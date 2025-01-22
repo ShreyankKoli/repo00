@@ -1,0 +1,33 @@
+<mat-card>
+    <mat-card-header>
+      <h2>{{ isEdit ? 'Edit Product' : 'Add Product' }}</h2>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="saveProduct()">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Title</mat-label>
+          <input matInput [(ngModel)]="product.title" name="title" required />
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="product.description" name="description" required></textarea>
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Price</mat-label>
+          <input matInput type="number" [(ngModel)]="product.price" name="price" required />
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+          <mat-label>Stock</mat-label>
+          <input matInput type="number" [(ngModel)]="product.stock" name="stock" required />
+        </mat-form-field>
+  
+        <button mat-raised-button color="primary" type="submit">
+          {{ isEdit ? 'Update' : 'Save' }}
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  
