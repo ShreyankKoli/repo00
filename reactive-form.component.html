@@ -1,0 +1,234 @@
+<p>reactive-form works!</p>
+<div class="container">
+    <div class="col-15">
+      <div class="card">
+        <div class="card-header bg-success">
+          New Employee
+        </div>
+        <div class="card-body">
+          <form [formGroup]="employeeForm"  (ngSubmit)="onClickSubmit('')">
+            <div class="row">
+              <div class="col-12">
+                <label for="">Name</label>
+                <input type="text" formControlName="name" id="name" name="name" class="form-control">
+                <div *ngIf="employeeForm.controls['name'].touched">
+                  <div *ngIf="employeeForm.controls['name'].errors?.['required']" class="text-danger">Enter Your Name
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="">Email</label>
+                <input type="text" formControlName="email" id="email" name="email" class="form-control">
+                <div *ngIf="employeeForm.controls['email'].touched">
+                  <div *ngIf="employeeForm.controls['email'].errors?.['required']" class="text-danger">Enter Your Email
+                  </div>
+                  <div *ngIf="employeeForm.controls['email'].errors?.['email']" class="text-danger">Invalid Email Address.
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="">Contact No</label>
+                <input type="text" formControlName="contactNo" id="contactNo" name="contactNo" class="form-control">
+                <div *ngIf="employeeForm.controls['contactNo'].touched">
+                  <div *ngIf="employeeForm.controls['contactNo'].errors?.['required']" class="text-danger">Enter Your
+                    contactNo</div>
+                  <div *ngIf="employeeForm.controls['contactNo'].errors?.['pattern']" class="text-danger">Invalid phone
+                    number.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="">City</label>
+                <input type="text" formControlName="city" id="city" name="city" class="form-control">
+                <div *ngIf="employeeForm.controls['city'].touched">
+                  <div *ngIf="employeeForm.controls['city'].errors?.['required']" class="text-danger">Enter City Name
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="">State</label>
+                <input type="text" formControlName="state" id="state" name="state" class="form-control">
+                <div *ngIf="employeeForm.controls['state'].touched">
+                  <div *ngIf="employeeForm.controls['state'].errors?.['required']" class="text-danger">Enter State Name
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="">Pincode</label>
+                <input type="text" formControlName="pincode" id="pincode" name="pincode" class="form-control">
+                <div *ngIf="employeeForm.controls['pincode'].touched">
+                  <div *ngIf="employeeForm.controls['pincode'].errors?.['required']" class="text-danger">Enter Pincode
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <label for="">Address</label>
+                <textarea type="text" formControlName="address" id="address" name="address" class="form-control">
+                </textarea>
+                <div *ngIf="employeeForm.controls['address'].touched">
+                  <div *ngIf="employeeForm.controls['address'].errors?.['required']" class="text-danger">Enter Your
+                    Address</div>
+                </div>
+              </div>
+            </div>
+            <div class="row pt-2">
+              <div class="col-6 text-centre">
+                <button type="reset" class="btn btn-secondary">Reset</button>
+              </div>
+              <div class="col-6 mb-lg-0">
+                @if(employeeForm.controls['empid'].value =='1' ){
+                  <button type="submit" class="btn btn-success" (click)="onUpdate()" >Update</button>
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                }
+                @else{
+                    <button type="submit" class="btn btn-success" (click)="onSave()" >Save</button>
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                }
+                &nbsp;
+                <button class="btn btn-danger" (click)="onDeleteAll()">Delete All</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="container d-flex">
+</div>
+<div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-success">
+          <h6>Employee List</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Sr No</th>
+                    <th>Name</th>
+                    <th>Contact No</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>PinCode</th>
+                    <th>State</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(item of employeeList; track $index){
+                    <tr>
+                      <th>{{$index+1}}</th>
+                      <th>{{item.name}}</th>
+                      <th>{{item.contactNo}}</th>
+                      <th>{{item.email}}</th>
+                      <th>{{item.address}}</th>
+                      <th>{{item.city}}</th>
+                      <th>{{item.pincode}}</th>
+                      <th>{{item.state}}</th>
+                      <th>
+                        <button class="btn btn-primary mx-2" (click)="onEdit(item)">Edit</button>
+                        <button class="btn btn-warning" (click)="onDelete(item.empid)">Delete</button>
+                      </th>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+</div> -->
+
+<mat-card>
+    <mat-card-header>
+        <mat-form-field>
+            <input matInput (keyup)="filterChange($event)" placeholder="Seacrh by Name"/>
+        </mat-form-field>
+    </mat-card-header>
+    <mat-card-content>
+ 
+    <table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  
+    
+      <ng-container matColumnDef="empid">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> empid </th>
+        <td mat-cell *matCellDef="let element"> {{element.empid}} </td>
+      </ng-container>
+  
+    
+       <ng-container matColumnDef="name">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> name </th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="city">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> city </th>
+        <td mat-cell *matCellDef="let element"> {{element.city}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="address">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> address </th>
+        <td mat-cell *matCellDef="let element"> {{element.address}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="state">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> state </th>
+        <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="pincode">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef> pincode </th>
+        <td mat-cell *matCellDef="let element"> {{element.pincode}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="contactNo">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef > contactNo </th>
+        <td mat-cell *matCellDef="let element"> {{element.contactNo}} </td>
+      </ng-container> 
+
+      <ng-container matColumnDef="email">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef > email </th>
+        <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+      </ng-container> 
+
+      <ng-container matColumnDef="Action">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let element"> 
+            <button mat-raised-button color="primary" (click)="onEdit(element)">Edit</button>
+            &nbsp;
+            <button mat-raised-button color="warn" (click)="onDelete(element.empid)">Delete</button>
+        </td>
+      </ng-container> 
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    </mat-card-content>
+    <br>    
+    <mat-card-footer>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons>
+</mat-paginator>
+    </mat-card-footer>
+    </mat-card>
+    
+  
+  
+  
+  <router-outlet></router-outlet>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+  
