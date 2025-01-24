@@ -1,74 +1,116 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild,AfterViewInit } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { EmployeeModel } from '../../Model/EmployeeModel';
+import { ServiceService } from '../../Service/service.service';
 import { MatTableDataSource } from '@angular/material/table';
-import * as _ from 'lodash';
+import { Router } from '@angular/router';
+import * as _ from 'lodash'
+import { uniqBy } from 'lodash';
 
 @Component({
-  selector: 'app-employee',
-  templateUrl: './employee.component.html',
-  styleUrls: ['./employee.component.css']
+  selector: 'app-table',
+  standalone: false,
+  
+  templateUrl: './table.component.html',
+  styleUrl: './table.component.css'
 })
-export class EmployeeComponent implements OnInit {
-  employeeList: employeeModel[] = [];
-  displayedColumns: string[] = ['name', 'state', 'position']; // Adjust these columns
-  dataSource = new MatTableDataSource<employeeModel>([]);
-  uniqueStates: string[] = []; // For dropdown options
+export class TableComponent implements OnInit ,AfterViewInit {
+  employeeData: any;
+  public dataSource: any =[];
+  public displayedColumns: string[]=["empid","name","city","contactNo","pincode","state","email","address","Action"]
+  response: any=[];
+  employeeList: EmployeeModel[]=[];   
+  public list: any =[];
+  data:any=[];
+  uniqueStates: string[] = [];
 
-  ngOnInit(): void {
-    const oldData = localStorage.getItem('EmpData');
-    if (oldData != null) {
-      const parseData = JSON.parse(oldData);
+  @ViewChild(MatPaginator) paginator !: MatPaginator;
+  @ViewChild(MatSort) sort !: MatSort;
 
-      // Remove duplicate state entries
-      this.employeeList = _.uniqBy(parseData, 'state');
-
-      // Extract unique states for dropdown
-      this.uniqueStates = [...new Set(this.employeeList.map((item) => item.state))];
-
-      // Set the filtered employee list to the datasource
-      this.dataSource = new MatTableDataSource(this.employeeList);
-    }
+  constructor(public service:ServiceService, public router:Router){
+   
+  }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
-  onChange(event: any): void {
-    const selectedState = event.value;
+  ngOnInit(): void {
+    const oldData = localStorage.getItem("EmpData"); 
+    if(oldData != null){
+      // const parseData = JSON.parse(oldData);   
+      const parseData:EmployeeModel[] = JSON.parse(oldData);   
+      this.employeeList = parseData; 
+      const tempArr: any[] = []; 
+      // this.employeeList = uniqBy(parseData, 'state');
+      // this.uniqueStates = [...new Set(this.employeeList.map((item) => item.state))];
+      parseData.forEach((e) => {
+        if(tempArr.includes(e.state))
+        {
+        }
+        else{
+          tempArr.push(e.state);
+        }
+      })
+      this.uniqueStates = tempArr;
+      console.log(this.uniqueStates,'data')
+      console.log(tempArr,'arr');
+      this.dataSource = new MatTableDataSource<EmployeeModel>(this.employeeList);
+      // this.data = new MatTableDataSource(this.employeeList);
+      // parseData = this.employeeList.reduce((a,b)=>{
+      //   if(!a.find((b=>b.state)){
+      //     console.log(a);
+      //   }
+      //   return a;
+        
+      // },[]);
+      //  this.data = parseData.some((employee:any)=>{
+      //   employee.state === this.employeeList.filter((x)=>(x.state===x.state));
+      //   console.log(employee.state,'state')
+      //   // console.log(this.data);
+      // })
+      // this.response = parseData;
+      // console.log(this.employeeList,'list')
+    }
+    this.dataSource = new MatTableDataSource<EmployeeModel>(this.employeeList);
+    //this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort; 
+    // this.list = this.service.formData.state;
+    console.log(this.dataSource,"data");
+    console.log(this.dataSource.filteredData[0].state,"filterdata");
+    }
 
-    // Filter data based on selected state
-    const filteredData = _.filter(this.employeeList, (item) => item.state === selectedState);
+  onEdit(element: EmployeeModel){
+    this.service.formData = Object.assign({},element);
+    this.router.navigate(['/form'])
+  }
 
-    // Update the table's dataSource
+  onDelete(id:number){
+    const isDelete = confirm("Do you wanna delete");
+    if(isDelete){
+      const index = this.employeeList.findIndex(m=>m.empid==id);
+      this.employeeList.splice(index,1);
+      localStorage.setItem("EmpData", JSON.stringify(this.employeeList));
+      window.location.reload();
+    }
+  }
+  
+  filterChange(data:Event){
+    const value = (data.target as HTMLInputElement).value;
+    this.dataSource.filter = value;
+  }
+
+  onChange($event:any){
+    let filteredData = this.dataSource.filter((x:any)=>x.state == this.employeeList);
     this.dataSource = new MatTableDataSource(filteredData);
+  }
+
+  onReset(){
+    this.dataSource = new MatTableDataSource<EmployeeModel>(this.employeeList);
+    this.dataSource.paginator = this.paginator; 
+    this.dataSource.sort = this.sort;
   }
 }
 
 
-<div>
-  <mat-form-field appearance="fill">
-    <mat-select placeholder="Select State" (selectionChange)="onChange($event)">
-      <mat-option *ngFor="let state of uniqueStates" [value]="state">{{ state }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-    <!-- Name Column -->
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef> Name </th>
-      <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
-    </ng-container>
-
-    <!-- State Column -->
-    <ng-container matColumnDef="state">
-      <th mat-header-cell *matHeaderCellDef> State </th>
-      <td mat-cell *matCellDef="let element"> {{ element.state }} </td>
-    </ng-container>
-
-    <!-- Position Column -->
-    <ng-container matColumnDef="position">
-      <th mat-header-cell *matHeaderCellDef> Position </th>
-      <td mat-cell *matCellDef="let element"> {{ element.position }} </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-</div>
