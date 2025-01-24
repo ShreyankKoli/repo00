@@ -1,5 +1,5 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 export interface Product {
   id: number;
@@ -10,29 +10,44 @@ export interface Product {
 }
 
 @Component({
-  selector: 'app-view',
-  templateUrl: './view.component.html',
-  styleUrls: ['./view.component.css'],
+  selector: 'app-display',
+  templateUrl: './display.component.html',
+  styleUrls: ['./display.component.css'], // Fixed typo here
 })
-export class ViewComponent implements OnInit {
-  product: Product | null = null;
+export class DisplayComponent implements OnInit {
+  displayedColumns: string[] = ['id', 'title', 'description', 'image', 'price', 'actions'];
+  dataSource: Product[] = [];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.fetchProduct(parseInt(productId, 10));
-    }
+    this.fetchData();
   }
 
-  fetchProduct(id: number) {
+  fetchData() {
     const localData = localStorage.getItem('products');
     if (localData) {
-      const products: Product[] = JSON.parse(localData);
-      this.product = products.find(product => product.id === id) || null;
+      this.dataSource = JSON.parse(localData);
+    } else {
+      this.http.get<{ products: Product[] }>('https://dummyjson.com/products') // Corrected "products" property
+        .subscribe(response => {
+          this.dataSource = response.products.map(({ id, title, description, image, price }) => ({ id, title, description, image, price }));
+          localStorage.setItem('products', JSON.stringify(this.dataSource));
+        });
     }
   }
-}
 
+  editProduct(product: Product) {
+    const updatedTitle = prompt('Edit Title', product.title);
+    if (updatedTitle !== null) {
+      product.title = updatedTitle;
+      localStorage.setItem('products', JSON.stringify(this.dataSource));
+    }
+  }
+
+  deleteProduct(id: number) {
+    this.dataSource = this.dataSource.filter(product => product.id !== id);
+    localStorage.setItem('products', JSON.stringify(this.dataSource));
+  }
+}
 
