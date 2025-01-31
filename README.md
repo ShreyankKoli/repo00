@@ -1,53 +1,69 @@
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 
-export interface Product {
-  id: number;
+interface Product {
   title: string;
   description: string;
-  image: string;
+  images: string[];
   price: number;
+  stock: number;
 }
 
 @Component({
-  selector: 'app-display',
-  templateUrl: './display.component.html',
-  styleUrls: ['./display.component.css'], // Fixed typo here
+  selector: 'app-product-table',
+  templateUrl: './product-table.component.html',
+  styleUrls: ['./product-table.component.css'],
 })
-export class DisplayComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'title', 'description', 'image', 'price', 'actions'];
-  dataSource: Product[] = [];
+export class ProductTableComponent implements OnInit, AfterViewInit {
+  displayedColumns: string[] = ['title', 'description', 'price', 'stock', 'images', 'action'];
+  dataSource: MatTableDataSource<Product> = new MatTableDataSource<Product>([]);
+  productList: Product[] = [];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.fetchData();
-  }
-
-  fetchData() {
-    const localData = localStorage.getItem('products');
-    if (localData) {
-      this.dataSource = JSON.parse(localData);
+    const storedData = localStorage.getItem('ProductData');
+    if (storedData) {
+      this.productList = JSON.parse(storedData);
+      this.dataSource.data = this.productList;
     } else {
-      this.http.get<{ products: Product[] }>('https://dummyjson.com/products') // Corrected "products" property
-        .subscribe(response => {
-          this.dataSource = response.products.map(({ id, title, description, image, price }) => ({ id, title, description, image, price }));
-          localStorage.setItem('products', JSON.stringify(this.dataSource));
-        });
+      this.fetchProducts();
     }
   }
 
-  editProduct(product: Product) {
-    const updatedTitle = prompt('Edit Title', product.title);
-    if (updatedTitle !== null) {
-      product.title = updatedTitle;
-      localStorage.setItem('products', JSON.stringify(this.dataSource));
-    }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
-  deleteProduct(id: number) {
-    this.dataSource = this.dataSource.filter(product => product.id !== id);
-    localStorage.setItem('products', JSON.stringify(this.dataSource));
+  fetchProducts(): void {
+    this.http.get<{ products: Product[] }>('https://dummyjson.com/products').subscribe((response) => {
+      this.productList = response.products.map((product) => ({
+        title: product.title,
+        description: product.description,
+        images: product.images,
+        price: product.price,
+        stock: product.stock,
+      }));
+
+      localStorage.setItem('ProductData', JSON.stringify(this.productList));
+      this.dataSource.data = this.productList;
+    });
+  }
+
+  onDelete(index: number): void {
+    if (confirm('Do you want to delete this product?')) {
+      this.productList.splice(index, 1);
+      localStorage.setItem('ProductData', JSON.stringify(this.productList));
+      this.dataSource.data = this.productList;
+    }
   }
 }
+
 
