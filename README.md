@@ -1,68 +1,52 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+onSave() {
+  if (this.productForm.invalid) {
+    this.isFormSubmitted = true;
+    return;
+  }
 
-interface Product {
-  title: string;
-  description: string;
-  images: string[];
-  price: number;
-  stock: number;
+  // Retrieve existing data from localStorage
+  const oldData = localStorage.getItem("ProductData");
+  let productList = oldData ? JSON.parse(oldData) : [];
+
+  // Assign a unique ID (incremental)
+  const newId = productList.length > 0 ? productList[productList.length - 1].id + 1 : 1;
+  this.productForm.controls['id'].setValue(newId);
+
+  // Add new product to the list
+  productList.unshift(this.productForm.value);
+
+  // Save updated data to localStorage
+  localStorage.setItem('ProductData', JSON.stringify(productList));
+
+  // Update the local list in the component
+  this.productList = productList;
+
+  // Navigate to display page
+  this.router.navigate(['/display']);
+  alert("Data inserted successfully");
 }
 
-@Component({
-  selector: 'app-product-table',
-  templateUrl: './product-table.component.html',
-  styleUrls: ['./product-table.component.css'],
-})
-export class ProductTableComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['title', 'description', 'price', 'stock', 'images', 'action'];
-  dataSource: MatTableDataSource<Product> = new MatTableDataSource<Product>([]);
-  productList: Product[] = [];
+onUpdate() {
+  const oldData = localStorage.getItem("ProductData");
+  let productList = oldData ? JSON.parse(oldData) : [];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // Find the existing record by ID
+  const recordIndex = productList.findIndex(m => m.id === this.productForm.controls['id'].value);
 
-  constructor(private http: HttpClient) {}
+  if (recordIndex !== -1) {
+    // Update the existing record
+    productList[recordIndex] = { ...this.productForm.value };
 
-  ngOnInit(): void {
-    const storedData = localStorage.getItem('ProductData');
-    if (storedData) {
-      this.productList = JSON.parse(storedData);
-      this.dataSource.data = this.productList;
-    } else {
-      this.fetchProducts();
-    }
-  }
+    // Save updated data to localStorage
+    localStorage.setItem('ProductData', JSON.stringify(productList));
 
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
+    // Update the local list in the component
+    this.productList = productList;
 
-  fetchProducts(): void {
-    this.http.get<{ products: Product[] }>('https://dummyjson.com/products').subscribe((response) => {
-      this.productList = response.products.map((product) => ({
-        title: product.title,
-        description: product.description,
-        images: product.images,
-        price: product.price,
-        stock: product.stock,
-      }));
-
-      localStorage.setItem('ProductData', JSON.stringify(this.productList));
-      this.dataSource.data = this.productList;
-    });
-  }
-
-  onDelete(index: number): void {
-    if (confirm('Do you want to delete this product?')) {
-      this.productList.splice(index, 1);
-      localStorage.setItem('ProductData', JSON.stringify(this.productList));
-      this.dataSource.data = this.productList;
-    }
+    alert("Data Updated Successfully");
+    this.router.navigate(['/display']);
+  } else {
+    alert("Error: Record not found");
   }
 }
 
