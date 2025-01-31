@@ -4,50 +4,36 @@ onSave() {
     return;
   }
 
-  // Retrieve existing data from localStorage
   const oldData = localStorage.getItem("ProductData");
-  let productList = oldData ? JSON.parse(oldData) : [];
+  let productData = oldData ? JSON.parse(oldData) : [];
 
-  // Assign a unique ID (incremental)
-  const newId = productList.length > 0 ? productList[productList.length - 1].id + 1 : 1;
-  this.productForm.controls['id'].setValue(newId);
+  const newProduct = { ...this.productForm.value };
+  newProduct.id = productData.length ? productData[productData.length - 1].id + 1 : 1;
 
-  // Add new product to the list
-  productList.unshift(this.productForm.value);
+  productData.unshift(newProduct);
+  localStorage.setItem("ProductData", JSON.stringify(productData));
 
-  // Save updated data to localStorage
-  localStorage.setItem('ProductData', JSON.stringify(productList));
-
-  // Update the local list in the component
-  this.productList = productList;
-
-  // Navigate to display page
   this.router.navigate(['/display']);
-  alert("Data inserted successfully");
+  alert("Data inserted successfully!");
 }
 
 onUpdate() {
   const oldData = localStorage.getItem("ProductData");
-  let productList = oldData ? JSON.parse(oldData) : [];
+  if (!oldData) return;
 
-  // Find the existing record by ID
-  const recordIndex = productList.findIndex(m => m.id === this.productForm.controls['id'].value);
+  let productData = JSON.parse(oldData);
+  const index = productData.findIndex((p: any) => p.id === this.productForm.controls['id'].value);
 
-  if (recordIndex !== -1) {
-    // Update the existing record
-    productList[recordIndex] = { ...this.productForm.value };
+  if (index !== -1) {
+    productData[index] = { ...this.productForm.value };
+    localStorage.setItem("ProductData", JSON.stringify(productData));
 
-    // Save updated data to localStorage
-    localStorage.setItem('ProductData', JSON.stringify(productList));
-
-    // Update the local list in the component
-    this.productList = productList;
-
-    alert("Data Updated Successfully");
+    alert("Data updated successfully!");
     this.router.navigate(['/display']);
   } else {
-    alert("Error: Record not found");
+    alert("Product not found!");
   }
 }
+
 
 
