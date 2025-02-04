@@ -1,39 +1,32 @@
-onSave() {
-  if (this.productForm.invalid) {
-    this.isFormSubmitted = true;
-    return;
-  }
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Users } from './models/users';
 
-  const oldData = localStorage.getItem("ProductData");
-  let productData = oldData ? JSON.parse(oldData) : [];
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent implements OnInit {
+  users: Users[] = [];
 
-  const newProduct = { ...this.productForm.value };
-  newProduct.id = productData.length ? productData[productData.length - 1].id + 1 : 1;
+  constructor(private http: HttpClient) {}
 
-  productData.unshift(newProduct);
-  localStorage.setItem("ProductData", JSON.stringify(productData));
+  ngOnInit(): void {
+    this.http.get<Users[]>('https://jsonplaceholder.typicode.com/users')
+  .subscribe(data => {
+    if (Array.isArray(data)) {
+      const mappedUsers = data.map(user => ({
+        id: user.id,
+        name: user.name,
+        username: user.username
+      }));
 
-  this.router.navigate(['/display']);
-  alert("Data inserted successfully!");
+      localStorage.setItem('users', JSON.stringify(mappedUsers));
+      this.users = mappedUsers;
+    } else {
+      console.error('Unexpected API response:', data);
+    }
+  });
+
 }
-
-onUpdate() {
-  const oldData = localStorage.getItem("ProductData");
-  if (!oldData) return;
-
-  let productData = JSON.parse(oldData);
-  const index = productData.findIndex((p: any) => p.id === this.productForm.controls['id'].value);
-
-  if (index !== -1) {
-    productData[index] = { ...this.productForm.value };
-    localStorage.setItem("ProductData", JSON.stringify(productData));
-
-    alert("Data updated successfully!");
-    this.router.navigate(['/display']);
-  } else {
-    alert("Product not found!");
-  }
-}
-
-
-
