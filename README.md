@@ -1,32 +1,38 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Users } from './models/users';
-
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
-})
-export class AppComponent implements OnInit {
-  users: Users[] = [];
-
-  constructor(private http: HttpClient) {}
-
-  ngOnInit(): void {
-    this.http.get<Users[]>('https://jsonplaceholder.typicode.com/users')
-  .subscribe(data => {
-    if (Array.isArray(data)) {
-      const mappedUsers = data.map(user => ({
-        id: user.id,
-        name: user.name,
-        username: user.username
-      }));
-
-      localStorage.setItem('users', JSON.stringify(mappedUsers));
-      this.users = mappedUsers;
-    } else {
-      console.error('Unexpected API response:', data);
-    }
-  });
-
+addToCart(product: Product) {
+  if (product.stock > 0) {
+    product.stock--;
+    product.price += product.price; // Modify this based on your pricing logic
+  }
 }
+
+removeFromCart(product: Product) {
+  product.stock++;
+  product.price -= product.price; // Modify based on your pricing logic
+}
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Other table columns -->
+
+  <ng-container matColumnDef="stock">
+    <th mat-header-cell *matHeaderCellDef> Stock </th>
+    <td mat-cell *matCellDef="let product">{{ product.stock }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="price">
+    <th mat-header-cell *matHeaderCellDef> Price </th>
+    <td mat-cell *matCellDef="let product">{{ product.price | currency }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef> Actions </th>
+    <td mat-cell *matCellDef="let product">
+      <button mat-button color="primary" (click)="addToCart(product)">Add to Cart</button>
+      <button mat-button color="warn" (click)="removeFromCart(product)" [disabled]="product.stock <= 0">Remove</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+
