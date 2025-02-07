@@ -1,38 +1,23 @@
-addToCart(product: Product) {
-  if (product.stock > 0) {
-    product.stock--;
-    product.price += product.price; // Modify this based on your pricing logic
-  }
-}
-
 removeFromCart(product: Product) {
-  product.stock++;
-  product.price -= product.price; // Modify based on your pricing logic
+    const index = this.items.findIndex((item) => item.id === product.id);
+    console.log(index, "index");
+
+    if (index !== -1) {
+        this.items.splice(index, 1); // Remove item from cart
+
+        // Count how many times this product is still in the cart
+        const itemsInCart = this.items.filter(item => item.id === product.id).length;
+
+        // Ensure stock never exceeds its original count
+        if (product.stock < (itemsInCart + 1)) {
+            product.stock++;
+        }
+
+        this.totalPrice -= product.price;
+        console.warn(this.totalPrice, "DecreasePrice");
+    }
 }
 
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-  <!-- Other table columns -->
-
-  <ng-container matColumnDef="stock">
-    <th mat-header-cell *matHeaderCellDef> Stock </th>
-    <td mat-cell *matCellDef="let product">{{ product.stock }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="price">
-    <th mat-header-cell *matHeaderCellDef> Price </th>
-    <td mat-cell *matCellDef="let product">{{ product.price | currency }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef> Actions </th>
-    <td mat-cell *matCellDef="let product">
-      <button mat-button color="primary" (click)="addToCart(product)">Add to Cart</button>
-      <button mat-button color="warn" (click)="removeFromCart(product)" [disabled]="product.stock <= 0">Remove</button>
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+  
 
 
