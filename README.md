@@ -1,23 +1,11 @@
-removeFromCart(product: Product) {
-    const index = this.items.findIndex((item) => item.id === product.id);
-    console.log(index, "index");
-
-    if (index !== -1) {
-        this.items.splice(index, 1); // Remove item from cart
-
-        // Count how many times this product is still in the cart
-        const itemsInCart = this.items.filter(item => item.id === product.id).length;
-
-        // Ensure stock never exceeds its original count
-        if (product.stock < (itemsInCart + 1)) {
-            product.stock++;
-        }
-
-        this.totalPrice -= product.price;
-        console.warn(this.totalPrice, "DecreasePrice");
-    }
+.popup {
+  position: absolute;
+  top: 110%; /* Adjust based on your layout */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
-
-  
-
-
